@@ -1,7 +1,7 @@
 const Database = require("better-sqlite3");
 const { CATEGORIES } = require("./constants");
 
-const db = new Database("database.db");
+const db = new Database("blog_database.db");
 db.pragma("foreign_keys = ON");
 
 // Users Table
@@ -11,7 +11,7 @@ db.prepare(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     `,
@@ -29,7 +29,7 @@ db.prepare(`
 // Posts Table
 db.prepare(
   `
-        CREATE TABEL IF NOT EXISTS posts (
+        CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             title TEXT NOT NULL,
@@ -42,7 +42,7 @@ db.prepare(
 
             FOREIGN KEY (user_id)
             REFERENCES users(id)
-            ON DELETE CASCADE
+            ON DELETE CASCADE,
 
             FOREIGN KEY (category_id)
             REFERENCES categories(id)
@@ -52,14 +52,15 @@ db.prepare(
 ).run();
 
 // Insert Default Categories
-const insertCategories =  db.prepare(
+const insertCategories = db.prepare(
     `
         INSERT OR IGNORE INTO categories (name)
         VALUES(?)
     `
 );
 
-for(const category of Object.values(CATEGORIES)) {
-    insertCategories.run(category)
+for (const category of Object.values(CATEGORIES)) {
+    insertCategories.run(category);
 }
+
 module.exports = db;

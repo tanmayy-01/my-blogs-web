@@ -3,6 +3,8 @@ const express = require("express");
 const session = require("express-session");
 const path = require("path");
 const app = express();
+const db = require('./database');
+const bcrypt = require("bcrypt");
 
 app.use(
   session({
@@ -30,18 +32,54 @@ const redirectIfLoggedIn = (req, res, next) => {
 app.use(express.static("public"));
 app.set("view engine", 'ejs');
 app.set("views", path.join(__dirname, "views"));
+app.use(express.urlencoded({ extended: true }));
 
 app.get(['/','/home'], protectRoute, (req,res) => {
-    res.render('home.ejs')
+    res.render('home.ejs', { username: req.session.username })
 })
 
 app.get('/login', redirectIfLoggedIn,(req, res) => {
-  res.render("login.ejs");
+  res.render("login.ejs",{ error: null });
 });
 
 app.get("/register",redirectIfLoggedIn, (req, res) => {
-  res.render("register.ejs");
+    req.session.isLoggedIn
+  res.render("register.ejs",{ error: null });
 });
+
+app.post('/register', redirectIfLoggedIn, async(req, res) => {
+    const {username, email, password} = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(password,10)
+        const insertUser = db.prepare(
+            "INSERT INTO users (username, email, password) VALUES ( ?, ?, ?)"
+        )
+        insertUser.run(username,email,hashedPassword)
+
+        req.session.isLoggedIn = true;
+        req.session.username = username;
+
+        res.redirect("/");
+    } catch (error) {
+        console.error(error)
+        res.render("register.ejs", { error: "Something went wrong. Please try again." });
+    }
+    
+})
+
+
+app.get("/logout", (req, res) => {
+  
+  req.session.destroy((err) => {
+    if (err) {
+      console.log("Error destroying session:", err);
+      return res.redirect("/"); 
+    }
+    res.clearCookie("connect.sid");
+    res.redirect("/login");
+  });
+});
+
 
 app.listen(process.env.PORT, () => {
   console.log("server started", process.env.PORT);

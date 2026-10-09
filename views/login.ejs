@@ -47,6 +47,10 @@
           <a href="/register">Register</a>
         </div>
       </form>
+
+      <% if (error) { %>
+       <p style="color: red;"><%= error %></p>
+      <% } %>
     </div>
   </body>
 </html>

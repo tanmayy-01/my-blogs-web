@@ -18,7 +18,7 @@
             name="username"
             required
             placeholder="Enter username"
-            maxlength="6"
+            maxlength="12"
           />
         </div>
         <!-- Email -->
@@ -45,6 +45,11 @@
           <a href="/login">Login</a>
         </div>
       </form>
+        <% if (error) { %>
+       <p style="color: red;"><%= error %></p>
+      <% } %>
     </div>
+
+
   </body>
 </html>
