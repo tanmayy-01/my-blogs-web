@@ -47,6 +47,30 @@ app.get("/register",redirectIfLoggedIn, (req, res) => {
   res.render("register.ejs",{ error: null });
 });
 
+app.post("/login", redirectIfLoggedIn, async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+
+    if (!user) {
+      return res.render("login.ejs", { error: "Invalid email or password." });
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.render("login.ejs", { error: "Invalid email or password." });
+    }
+    req.session.isLoggedIn = true;
+    req.session.username = user.username;
+    req.session.userId = user.id;
+
+    res.redirect("/");
+  } catch (error) {
+    res.render("login.ejs", { error: "An unexpected error occurred." });
+  }
+});
+
 app.post('/register', redirectIfLoggedIn, async(req, res) => {
     const {username, email, password} = req.body;
     try {

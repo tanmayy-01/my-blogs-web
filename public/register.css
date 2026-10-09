@@ -75,3 +75,8 @@ body {
   outline: none;
   background-color: #f8fafc;
 }
+
+#error-text {
+  color: red;
+  text-align: center;
+}

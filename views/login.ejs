@@ -38,6 +38,10 @@
           />
         </div>
 
+         <% if (error) { %>
+       <p id="error-text"><%= error %></p>
+      <% } %>
+
         <button type="submit" class="btn-submit">
           Login
         </button>
@@ -48,9 +52,7 @@
         </div>
       </form>
 
-      <% if (error) { %>
-       <p style="color: red;"><%= error %></p>
-      <% } %>
+     
     </div>
   </body>
 </html>
